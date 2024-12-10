@@ -53,7 +53,7 @@ export class UserController {
   async updatePassword(
     @Request() req, // Automatically gets user from token payload
     @Body() updatePasswordDto: UpdatePasswordDto,
-  ) {
+  ): Promise<void> {
     await this.userService.updatePassword(req.user.sub, updatePasswordDto);
   }
 
@@ -63,7 +63,7 @@ export class UserController {
     description: 'Name updated successfully',
   })
   @Put('name')
-  async updateName(@Request() req, @Body() updateNameDto: UpdateNameDto) {
+  async updateName(@Request() req, @Body() updateNameDto: UpdateNameDto): Promise<UserProfileDto> {
     return this.userService.updateName(req.user.sub, updateNameDto);
   }
 
@@ -76,8 +76,8 @@ export class UserController {
   async updateMobileNumber(
     @Request() req, // Automatically gets user from token payload
     @Body() updateMobileNumberDto: UpdateMobileNumberDto,
-  ) {
-    return await this.userService.updateMobileNumber(req.user.sub, updateMobileNumberDto);
+  ): Promise<UserProfileDto> {
+    return this.userService.updateMobileNumber(req.user.sub, updateMobileNumberDto);
   }
 
   @ApiOperation({
@@ -98,7 +98,7 @@ export class UserController {
     @Request() req,
     @Param('addressId') addressId: string,
     @Body() updateAddressDto: UpdateAddressDto,
-  ) {
+  ): Promise<UserProfileDto> {
     return this.userService.updateAddress(req.user.sub, addressId, updateAddressDto);
   }
 
@@ -120,6 +120,6 @@ export class UserController {
       throw new UnauthorizedException('Access token is required');
     }
 
-    return await this.userService.logout(accessToken, refreshTokenDto.token);
+    return this.userService.logout(accessToken, refreshTokenDto.token);
   }
 }

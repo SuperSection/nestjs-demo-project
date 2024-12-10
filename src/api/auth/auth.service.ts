@@ -36,7 +36,7 @@ export class AuthService {
 
     const hashedPassword = await hashPassword(password);
 
-    const user = await this.prisma.user.create({
+    await this.prisma.user.create({
       data: {
         ...userData,
         password: hashedPassword,
@@ -44,8 +44,7 @@ export class AuthService {
       },
     });
 
-    const tokens = await this.jwtUtils.generateTokens(user.id, user.email);
-    return tokens;
+    return { status: true, message: 'User registarted successfully' };
   }
 
   async validateUser(authDto: AuthenticateUserDto): Promise<TokensDto> {

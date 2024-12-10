@@ -47,32 +47,24 @@ export class UserService {
     const addressExists = user.address.some((addr) => addr.id === addressId);
     if (!addressExists) throw new BadRequestException('Address not found');
 
-    return this.prisma.address.update({
+    await this.prisma.address.update({
       where: { id: addressId },
       data: updateAddressDto,
-      select: {
-        addressLine: true,
-        landmark: true,
-        city: true,
-        state: true,
-        pin: true,
-        country: true, // Include only the necessary address fields
-      },
     });
+
+    return this.getUserProfile(userId);
   }
 
   async updateName(userId: string, { name }: UpdateNameDto) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new BadRequestException('User not found');
 
-    return this.prisma.user.update({
+    await this.prisma.user.update({
       where: { id: userId },
       data: { name },
-      select: {
-        name: true,
-        email: true,
-      },
     });
+
+    return this.getUserProfile(userId);
   }
 
   async updateMobileNumber(userId: string, updateMobileNumberDto: UpdateMobileNumberDto) {
@@ -87,14 +79,12 @@ export class UserService {
       throw new BadRequestException('Mobile number is already taken');
     }
 
-    return this.prisma.user.update({
+    await this.prisma.user.update({
       where: { id: userId },
       data: { mobile: updateMobileNumberDto.mobile },
-      select: {
-        email: true,
-        mobile: true,
-      },
     });
+
+    return this.getUserProfile(userId);
   }
 
   async getUserProfile(userId: string): Promise<UserProfileDto> {
