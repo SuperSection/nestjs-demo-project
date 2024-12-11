@@ -9,8 +9,10 @@ import {
   UpdatePasswordDto,
   UpdateNameDto,
   UpdateMobileNumberDto,
+  UpdateRoleDto,
 } from '../../dto/user.dto';
 import { UpdateAddressDto } from '../../dto/address.dto';
+import { Role } from '../../enums/role.enum';
 
 @Injectable()
 export class UserService {
@@ -113,6 +115,7 @@ export class UserService {
       name: user.name,
       email: user.email,
       mobile: user.mobile,
+      role: user.role as Role,
       address: user.address,
     };
   }
@@ -128,11 +131,23 @@ export class UserService {
     return { message: 'Logged out successfully' };
   }
 
+  async updateRole(updateRoleDto: UpdateRoleDto) {
+    const targetUser = await this.findUserByEmail(updateRoleDto.email);
+    if (!targetUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    await this.prisma.user.update({
+      where: { id: targetUser.id },
+      data: { role: updateRoleDto.role },
+    });
+  }
+
   async findUserById(id: string) {
-    return await this.prisma.user.findUnique({ where: { id } });
+    return this.prisma.user.findUnique({ where: { id } });
   }
 
   async findUserByEmail(email: string) {
-    return await this.prisma.user.findUnique({ where: { email } });
+    return this.prisma.user.findUnique({ where: { email } });
   }
 }

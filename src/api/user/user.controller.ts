@@ -4,9 +4,10 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Put,
-  Request,
+  Req,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -20,8 +21,10 @@ import {
   UpdatePasswordDto,
   UpdateNameDto,
   UpdateMobileNumberDto,
+  UpdateRoleDto,
 } from '../../dto/user.dto';
 import { RefreshTokenDto } from '../../dto/auth.dto';
+import { Request } from 'express';
 
 @ApiTags('users')
 @ApiBearerAuth('access-token')
@@ -36,7 +39,7 @@ export class UserController {
     description: 'User profile details',
   })
   @Get('profile')
-  async getProfile(@Request() req): Promise<UserProfileDto> {
+  async getProfile(@Req() req: Request): Promise<UserProfileDto> {
     return this.userService.getUserProfile(req.user.sub);
   }
 
@@ -51,7 +54,7 @@ export class UserController {
   @HttpCode(204)
   @Put('password')
   async updatePassword(
-    @Request() req, // Automatically gets user from token payload
+    @Req() req: Request,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ): Promise<void> {
     await this.userService.updatePassword(req.user.sub, updatePasswordDto);
@@ -63,7 +66,10 @@ export class UserController {
     description: 'Name updated successfully',
   })
   @Put('name')
-  async updateName(@Request() req, @Body() updateNameDto: UpdateNameDto): Promise<UserProfileDto> {
+  async updateName(
+    @Req() req: Request,
+    @Body() updateNameDto: UpdateNameDto,
+  ): Promise<UserProfileDto> {
     return this.userService.updateName(req.user.sub, updateNameDto);
   }
 
@@ -74,7 +80,7 @@ export class UserController {
   })
   @Put('mobile')
   async updateMobileNumber(
-    @Request() req, // Automatically gets user from token payload
+    @Req() req: Request, // Automatically gets user from token payload
     @Body() updateMobileNumberDto: UpdateMobileNumberDto,
   ): Promise<UserProfileDto> {
     return this.userService.updateMobileNumber(req.user.sub, updateMobileNumberDto);
@@ -95,7 +101,7 @@ export class UserController {
   })
   @Put('address/:addressId')
   async updateAddress(
-    @Request() req,
+    @Req() req: Request,
     @Param('addressId') addressId: string,
     @Body() updateAddressDto: UpdateAddressDto,
   ): Promise<UserProfileDto> {
@@ -107,10 +113,8 @@ export class UserController {
     status: 200,
     description: 'User logged out successfully',
   })
-  @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@Request() req: Request, @Body() refreshTokenDto: RefreshTokenDto) {
+  async logout(@Req() req: Request, @Body() refreshTokenDto: RefreshTokenDto) {
     if (!refreshTokenDto.token) {
       throw new UnauthorizedException('Refresh token is required');
     }
@@ -121,5 +125,16 @@ export class UserController {
     }
 
     return this.userService.logout(accessToken, refreshTokenDto.token);
+  }
+
+  @ApiOperation({ summary: 'Logout the user and invalidate tokens' })
+  @ApiResponse({
+    status: 200,
+    description: 'User logged out successfully',
+  })
+  @Patch('role')
+  async updateRole(@Req() req: Request, @Body() updateRoleDto: UpdateRoleDto) {
+    console.log(req.user);
+    return this.userService.updateRole(updateRoleDto);
   }
 }

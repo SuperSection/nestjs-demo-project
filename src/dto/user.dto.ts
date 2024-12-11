@@ -1,7 +1,16 @@
-import { IsEmail, IsNotEmpty, IsString, Matches, MinLength, ValidateNested } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+  Matches,
+  MinLength,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { AddressDto } from './address.dto';
+import { Role } from '../enums/role.enum';
 
 export class UserProfileDto {
   @ApiProperty()
@@ -23,6 +32,10 @@ export class UserProfileDto {
   @ValidateNested({ each: true })
   @Type(() => AddressDto)
   address: AddressDto[];
+
+  @ApiProperty()
+  @IsEnum(Role)
+  role: Role;
 }
 
 export class UpdatePasswordDto {
@@ -53,4 +66,14 @@ export class UpdateNameDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+}
+
+export class UpdateRoleDto {
+  @IsEmail()
+  @IsString()
+  @IsNotEmpty()
+  email: string;
+
+  @IsEnum(Role)
+  role: Role;
 }
